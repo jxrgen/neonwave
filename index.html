@@ -15,6 +15,7 @@
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
   --h:44px;
   --fs:1;
+  --namew:150px;   /* fælles bredde på navnekolonnen — brugt af BÅDE spor og lineal */
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
@@ -141,27 +142,31 @@ body.slock .knob,body.slock .fader,body.slock .st,body.slock .kbd{touch-action:p
 /* ---------- step grid ---------- */
 .seqwrap{overflow-x:auto;padding-bottom:4px}
 .lane{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-.lname{flex:0 0 calc(120px*var(--fs));height:calc(26px*var(--fs));min-height:26px;display:flex;align-items:center;gap:4px;padding:0 6px;border-radius:3px;
+.lname{width:150px;min-width:150px;max-width:150px;
+  width:var(--namew);min-width:var(--namew);max-width:var(--namew);flex:none;
+  height:calc(26px*var(--fs));min-height:26px;display:flex;align-items:center;gap:4px;padding:0 6px;border-radius:3px;
   background:linear-gradient(180deg,var(--raise),var(--raise2));border:1px solid var(--line);cursor:pointer;font-size:calc(9px*var(--fs));letter-spacing:.06em}
 .lname.sel{border-color:var(--amb);color:var(--amb);box-shadow:0 0 10px rgba(255,171,31,.15)}
 .lname .led{width:6px;height:6px;border-radius:50%;background:var(--knobtrk);flex:0 0 auto}
 .lname .t{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lname.lit .led{background:var(--amb);box-shadow:0 0 8px var(--amb)}
-.lname .solo{margin-left:0;width:17px;height:16px;display:grid;place-items:center;border-radius:3px;
+.lname .solo{width:17px;height:16px;display:grid;place-items:center;border-radius:3px;
   color:var(--dim2);font-size:calc(8px*var(--fs));font-weight:700;flex:0 0 auto;border:1px solid transparent}
 .lname .solo:hover{background:var(--cybg);color:var(--cyan)}
 .lname .solo.on{background:var(--cyan);color:var(--onink);box-shadow:0 0 8px var(--cyan)}
-.lname .hide{margin-left:6px;width:16px;height:16px;display:grid;place-items:center;border-radius:3px;
+.lname .hide{width:15px;height:16px;display:grid;place-items:center;border-radius:3px;
   color:var(--dim2);font-size:calc(11px*var(--fs));flex:0 0 auto}
 .lname .hide:hover{background:var(--redbg);color:var(--red)}
-.lname .m{margin-left:4px;flex:0 0 auto;width:calc(16px*var(--fs));min-width:14px;text-align:right;
+.lname .m{flex:0 0 auto;width:calc(15px*var(--fs));min-width:13px;text-align:right;
   font-size:calc(7px*var(--fs));color:var(--dim2)}
 .lname.mut{opacity:.4}
 .steps{display:flex;gap:3px}
 .st{width:26px;height:26px;flex:0 0 auto;border-radius:2px;border:1px solid var(--line);background:var(--cell);position:relative;
   overflow:hidden;cursor:pointer;touch-action:pan-y}
 body.valedit .st{touch-action:none}
-.st.b4{border-color:var(--line2);background:var(--cell4)}
+.st.b4{border-color:var(--line2);background:var(--cell4);box-shadow:-2px 0 0 var(--line2)}
+.ruler div.beat{position:relative}
+.ruler div.beat::after{content:"";position:absolute;left:-3px;top:-2px;bottom:-4px;width:2px;background:var(--line2)}
 .st .f{position:absolute;left:0;right:0;bottom:0;height:calc(var(--v,0)*100%);
   background:linear-gradient(180deg,var(--sc,var(--amb)),#a06400);opacity:.95}
 .st.on{box-shadow:0 0 8px var(--ambglow) inset}
@@ -169,7 +174,8 @@ body.valedit .st{touch-action:none}
 .st.pl{outline:1px solid var(--cyan);outline-offset:-1px}
 .st.cur{background:var(--curbg)}
 .rulerlane{display:flex;align-items:center;gap:6px;margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid var(--line)}
-.rulerlane .rspace{flex:0 0 calc(120px*var(--fs));}
+.rulerlane .rspace{width:150px;min-width:150px;max-width:150px;
+  width:var(--namew);min-width:var(--namew);max-width:var(--namew);flex:none}
 .ruler{display:flex;gap:3px}
 .ruler div{width:26px;flex:0 0 auto;text-align:center;font-size:calc(7px*var(--fs));color:var(--dim2)}
 .ruler div.beat{color:var(--dim);font-weight:700}
@@ -302,7 +308,6 @@ canvas.wave{width:100%;height:82px;display:block;background:var(--cell);border:1
   nav button .ic{font-size:calc(15px*var(--fs))}
   .st{width:30px;height:30px}
   .ruler div{width:30px}
-  .rulerlane .rspace{flex:0 0 calc(120px*var(--fs))}
   .lname{height:30px}
   nav button{height:52px}
   .fader{height:130px;width:40px}
@@ -1812,6 +1817,8 @@ let fontScale=parseFloat(LS&&LS.get?LS.get('nw_fs'):null)||1;
 function applyFontScale(v){
   fontScale=clamp(v,.85,1.6);
   document.documentElement.style.setProperty('--fs',fontScale.toFixed(2));
+  /* navnekolonnen skal følge skriften, men beregnes ÉT sted, så spor og lineal aldrig kan komme ud af trit */
+  document.documentElement.style.setProperty('--namew',Math.round(150*fontScale)+'px');
   if(typeof LS!=='undefined')LS.set('nw_fs',fontScale.toFixed(2));
   $$('#fsRow .fsb').forEach(b=>b.classList.toggle('on',Math.abs(+b.dataset.f-fontScale)<.01));
 }
